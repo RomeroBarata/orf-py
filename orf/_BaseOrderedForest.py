@@ -34,6 +34,8 @@ class BaseOrderedForest(BaseEstimator):
 
     # define init function
     def __init__(self, n_estimators=1000,
+                 max_depth=None,
+                 min_samples_split=2,
                  min_samples_leaf=5,
                  max_features=None,
                  replace=False,
@@ -45,6 +47,8 @@ class BaseOrderedForest(BaseEstimator):
                  random_state=None):
 
         self.n_estimators = n_estimators
+        self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
         self.max_features = max_features
         self.replace = replace
@@ -271,13 +275,13 @@ class BaseOrderedForest(BaseEstimator):
         OrderedForest estimation.
         """
         # Check if input is pandas data frame. If yes, save feature names
-        self.feature_names=None
+        self.feature_names = None
         if isinstance(X, pd.DataFrame):
-            self.feature_names=X.columns.values
+            self.feature_names = X.columns.values
         # Use sklearn input checks to allow for multiple types of inputs:
         # - returns numpy arrays for X and y (no matter which input type)
         # - forces y to be numeric
-        X,y = check_X_y(X, y, y_numeric=True, estimator="OrderedForest")
+        X, y = check_X_y(X, y, y_numeric=True, estimator="OrderedForest")
         # obtain total number of observations
         self.n_features = _num_features(X)
         # run input checks for arguments
@@ -292,15 +296,15 @@ class BaseOrderedForest(BaseEstimator):
         # Next, ensure that y is a vector of continuous integers starting at
         # 1 up to nclass
         # Check if y consists of integers
-        if all(isinstance(x, (np.integer)) for x in y_values):
+        if all(isinstance(x, np.integer) for x in y_values):
             # Recode y appropriately (keeps order but recodes values as 1,2...)
-            y = np.searchsorted(np.unique(y), y)+1
+            y = np.searchsorted(np.unique(y), y) + 1
             y_values = np.unique(y)
         else:
             # Check if continuous sequence
-            if ((min(y_values)==1) and (max(y_values)==nclass)):
+            if (min(y_values) == 1) and (max(y_values) == nclass):
                 # Recode y appropriately
-                y = (np.searchsorted(np.unique(y), y)+1).astype(int)
+                y = (np.searchsorted(np.unique(y), y) + 1).astype(int)
                 y_values = np.unique(y)
             else:
                 # raise value error
@@ -355,6 +359,8 @@ class BaseOrderedForest(BaseEstimator):
                 # call rf from scikit learn and save it in dictionary
                 forests[class_idx] = ske.RandomForestRegressor(
                     n_estimators=self.n_estimators,
+                    max_depth=self.max_depth,
+                    min_samples_split=self.min_samples_split,
                     min_samples_leaf=self.min_samples_leaf,
                     max_features=self.max_features,
                     max_samples=self.sample_fraction,
@@ -371,6 +377,8 @@ class BaseOrderedForest(BaseEstimator):
                 # call rf from scikit learn and save it in dictionary
                 forests[class_idx] = ske.RandomForestRegressor(
                     n_estimators=self.n_estimators,
+                    max_depth=self.max_depth,
+                    min_samples_split=self.min_samples_split,
                     min_samples_leaf=self.min_samples_leaf,
                     max_features=self.max_features,
                     max_samples=self.sample_fraction,
@@ -581,10 +589,10 @@ class BaseOrderedForest(BaseEstimator):
         # minus 1 for the column index as indices start with 0, outcomes with 1
         mse_matrix[np.arange(y.shape[0]), y-1] = 1
 
-        # compute mse directly now by substracting two dataframes and rowsums
+        # compute mse directly now by subtracting two dataframes and rowsums
         mse = np.mean(((mse_matrix - predictions) ** 2).sum(axis=1))
 
-        # compute rps (ranked probabilty score)
+        # compute rps (ranked probability score)
         # get the indicator matrix (same as for mse)
         rps_matrix = mse_matrix.copy()
         # prepare storage for cumulative scores

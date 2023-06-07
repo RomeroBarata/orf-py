@@ -30,3 +30,6 @@ MANIFEST
 
 # exclude folder with original (unadjusted) documentation created by pdoc
 /docs/orf/*
+
+# PyCharm IDE settings
+.idea/

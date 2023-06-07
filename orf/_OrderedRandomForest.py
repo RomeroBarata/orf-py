@@ -30,6 +30,8 @@ class OrderedRandomForest(BaseOrderedForest):
 
     # define init function
     def __init__(self, n_estimators=1000,
+                 max_depth=None,
+                 min_samples_split=2,
                  min_samples_leaf=5,
                  max_features=None,
                  replace=False,
@@ -42,6 +44,8 @@ class OrderedRandomForest(BaseOrderedForest):
         # access inherited methods
         super().__init__(
             n_estimators=n_estimators,
+            max_depth=max_depth,
+            min_samples_split=min_samples_split,
             min_samples_leaf=min_samples_leaf,
             max_features=max_features,
             replace=replace,
@@ -102,7 +106,7 @@ class OrderedRandomForest(BaseOrderedForest):
         inference = self.inference
 
         # Check if prob allows to do inference
-        if ((not prob) and (inference) and (X is not None)):
+        if (not prob) and inference and (X is not None):
             print('-' * 70,
                   'WARNING: Inference is not possible if prob=False.'
                   '\nClass predictions for large samples might be obtained'
@@ -133,7 +137,7 @@ class OrderedRandomForest(BaseOrderedForest):
             if not self.honesty:
                 probs = self._predict_default(X=X, n_samples=n_samples)
             # If honesty True, inference argument decides how to compute
-            # predicions
+            # predictions
             elif self.honesty and not inference:
                 probs = self._predict_leafmeans(X=X, n_samples=n_samples)
             # Remaining case refers to honesty=True and inference=True
@@ -163,9 +167,9 @@ class OrderedRandomForest(BaseOrderedForest):
                 # ("ordered classification")
                 pred_final = class_probs.argmax(axis=1) + 1
 
-            # Last step: Compute variance of predicitons
+            # Last step: Compute variance of predictions
             # If flag_newdata = True, variance can be computed in one step.
-            # Otherwise use same variance method as in fit function which
+            # Otherwise, use same variance method as in fit function which
             # accounts for splitting in training and honest sample
             if inference and prob:
                 # compute variance
@@ -912,6 +916,8 @@ class OrderedRandomForest(BaseOrderedForest):
             print('%-18s%-15s' % ('build:', 'Subsampling' if not
                                   self.replace else 'Bootstrap'))
             print('%-18s%-15s' % ('n_estimators:', self.n_estimators))
+            print('%-18s%-15s' % ('max_depth:', self.max_depth))
+            print('%-18s%-15s' % ('min_samples_split:', self.min_samples_split))
             print('%-18s%-15s' % ('max_features:', self.max_features))
             print('%-18s%-15s' % ('min_samples_leaf:', self.min_samples_leaf))
             print('%-18s%-15s' % ('replace:', self.replace))
@@ -941,6 +947,8 @@ class OrderedRandomForest(BaseOrderedForest):
             print('%-18s%-15s' % ('build:', 'Subsampling' if not
                                   self.replace else 'Bootstrap'))
             print('%-18s%-15s' % ('n_estimators:', self.n_estimators))
+            print('%-18s%-15s' % ('max_depth:', self.max_depth))
+            print('%-18s%-15s' % ('min_samples_split:', self.min_samples_split))
             print('%-18s%-15s' % ('max_features:', self.max_features))
             print('%-18s%-15s' % ('min_samples_leaf:', self.min_samples_leaf))
             print('%-18s%-15s' % ('replace:', self.replace))
@@ -971,6 +979,8 @@ class OrderedRandomForest(BaseOrderedForest):
             print('%-18s%-15s' % ('build:', 'Subsampling' if not
                                   self.replace else 'Bootstrap'))
             print('%-18s%-15s' % ('n_estimators:', self.n_estimators))
+            print('%-18s%-15s' % ('max_depth:', self.max_depth))
+            print('%-18s%-15s' % ('min_samples_split:', self.min_samples_split))
             print('%-18s%-15s' % ('max_features:', self.max_features))
             print('%-18s%-15s' % ('min_samples_leaf:', self.min_samples_leaf))
             print('%-18s%-15s' % ('replace:', self.replace))
